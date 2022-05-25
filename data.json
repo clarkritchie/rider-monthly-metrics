@@ -1,0 +1,41 @@
+{
+  "details": {
+    "class": "com.zone5cloud.events.obj.FooBar",
+    "previous": {
+      "sum": {
+        "training": 3600,
+        "distance": 15,
+        "ascent": 15
+      },
+      "max": {
+        "training": 3600,
+        "distance": 150,
+        "ascent": 15
+      },
+      "name": "2020-08",
+      "count": 2
+    },
+    "current": {
+      "sum": {
+        "training": 14400,
+        "distance": 120,
+        "ascent": 11
+      },
+      "max": {
+        "training": 7200,
+        "distance": 12,
+        "ascent": 12
+      },
+      "name": "2020-09",
+      "count": 1
+    },
+    "units": "metric"
+  },
+  "email": "clarkritchie+test1@gmail.com",
+  "eventType": "MONTHLY_METRICS",
+  "firstName": "Clark",
+  "lastName": "Ritchie",
+  "locale": "en",
+  "source": "FileProcessing",
+  "userIdentifier": "4f2a2440-b490-4466-b553-6171fbad28b4"
+}
