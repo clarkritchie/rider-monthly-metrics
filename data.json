@@ -4,16 +4,16 @@
     "previous": {
       "sum": {
         "training": 3600,
-        "distance": 15,
+        "distance": 156.56987625,
         "ascent": 15
       },
       "max": {
         "training": 3600,
-        "distance": 150,
+        "distance": 159.598715,
         "ascent": 15
       },
       "name": "2020-08",
-      "count": 2
+      "count": 1
     },
     "current": {
       "sum": {
@@ -27,9 +27,9 @@
         "ascent": 12
       },
       "name": "2020-09",
-      "count": 1
+      "count": 10
     },
-    "units": "metric"
+    "units": "imperial"
   },
   "email": "clarkritchie+test1@gmail.com",
   "eventType": "MONTHLY_METRICS",

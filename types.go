@@ -36,6 +36,19 @@ type MonthlyData struct {
 	Units    string     `json:"units"`
 }
 
+// there is no built in Abs for integers
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func roundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
+}
+
 func (d *Sum) ConvertSumToImperial() {
 	d.Distance = d.Distance * METERS_TO_MILES
 	d.Ascent = d.Ascent * METERS_TO_FEET
@@ -54,9 +67,8 @@ func (d *Max) FormatMaxForEmail(m ...Max) map[string]interface{} {
 	}
 	data := make(map[string]interface{})
 
-	// keep as float, but rounded
-	data["distance"] = math.Round(d.Distance*100) / 100
-	data["ascent"] = math.Round(d.Ascent*100) / 100
+	data["distance"] = roundFloat(d.Distance, 1)
+	data["ascent"] = roundFloat(d.Ascent, 1)
 
 	time := make(map[string]interface{})
 	hours, minutes := convertSecondsToHoursMinutes(d.Training) // d.Training is in seconds
@@ -65,15 +77,15 @@ func (d *Max) FormatMaxForEmail(m ...Max) map[string]interface{} {
 	// compute the delta to the previous month
 	if previousMax.Training > 0 {
 		previousHours, previousMinutes := convertSecondsToHoursMinutes(previousMax.Training)
-		time["hoursDelta"] = hours - previousHours
-		time["minutesDelta"] = minutes - previousMinutes
+		time["hoursDelta"] = abs(hours - previousHours)
+		time["minutesDelta"] = abs(minutes - previousMinutes)
 	}
 	data["training"] = time
 	if previousMax.Distance > 0 {
-		data["distanceDelta"] = d.Distance - previousMax.Distance
+		data["distanceDelta"] = roundFloat(math.Abs(d.Distance-previousMax.Distance), 1)
 	}
 	if previousMax.Ascent > 0 {
-		data["ascentDelta"] = d.Ascent - previousMax.Ascent
+		data["ascentDelta"] = roundFloat(math.Abs(d.Ascent-previousMax.Ascent), 1)
 	}
 
 	return data
@@ -87,9 +99,8 @@ func (d *Sum) FormatSumForEmail(s ...Sum) map[string]interface{} {
 	}
 	data := make(map[string]interface{})
 
-	// keep as float, but rounded
-	data["distance"] = math.Round(d.Distance*100) / 100
-	data["ascent"] = math.Round(d.Ascent*100) / 100
+	data["distance"] = roundFloat(d.Distance, 1)
+	data["ascent"] = roundFloat(d.Ascent, 1)
 
 	time := make(map[string]interface{})
 	hours, minutes := convertSecondsToHoursMinutes(d.Training) // d.Training is in seconds
@@ -98,15 +109,15 @@ func (d *Sum) FormatSumForEmail(s ...Sum) map[string]interface{} {
 	// compute the delta to the previous month
 	if previousSum.Training > 0 {
 		previousHours, previousMinutes := convertSecondsToHoursMinutes(previousSum.Training)
-		time["hoursDelta"] = hours - previousHours
-		time["minutesDelta"] = minutes - previousMinutes
+		time["hoursDelta"] = abs(hours - previousHours)
+		time["minutesDelta"] = abs(minutes - previousMinutes)
 	}
 	data["training"] = time
 	if previousSum.Distance > 0 {
-		data["distanceDelta"] = d.Distance - previousSum.Distance
+		data["distanceDelta"] = roundFloat(math.Abs(d.Distance-previousSum.Distance), 1)
 	}
 	if previousSum.Ascent > 0 {
-		data["ascentDelta"] = d.Ascent - previousSum.Ascent
+		data["ascentDelta"] = roundFloat(math.Abs(d.Ascent-previousSum.Ascent), 1)
 	}
 
 	return data
@@ -126,6 +137,7 @@ func (d *MonthlyData) FormatForEmail() map[string]interface{} {
 	current["max"] = d.Current.Max.FormatMaxForEmail(d.Previous.Max)
 	current["name"] = d.Current.Name
 	current["count"] = d.Current.Count
+	current["countDelta"] = abs(d.Current.Count - d.Previous.Count)
 
 	data["current"] = current
 	data["previous"] = previous
