@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	METERS_TO_MILES = 0.000621371192
-	METERS_TO_FEET  = 3.28084
+	METERS_TO_MILES      = 0.000621371192
+	METERS_TO_FEET       = 3.28084
+	METERS_TO_KILOMETERS = 1000
 )
 
 type Sum struct {
@@ -59,6 +60,14 @@ func (d *Max) ConvertMaxToImperial() {
 	d.Ascent = d.Ascent * METERS_TO_FEET
 }
 
+func (d *Sum) ConvertSumDistanceToKms() {
+	d.Distance = d.Distance / METERS_TO_KILOMETERS
+}
+
+func (d *Max) ConvertMaxDistanceToKms() {
+	d.Distance = d.Distance / METERS_TO_KILOMETERS
+}
+
 func (d *Max) FormatMaxForEmail(m ...Max) map[string]interface{} {
 	previousMax := Max{}
 	// with veradic functions, the optional parameter is a slice
@@ -75,16 +84,16 @@ func (d *Max) FormatMaxForEmail(m ...Max) map[string]interface{} {
 	time["hours"] = hours
 	time["minutes"] = minutes
 	// compute the delta to the previous month
-	if previousMax.Training > 0 {
+	if previousMax.Training >= 0 {
 		previousHours, previousMinutes := convertSecondsToHoursMinutes(previousMax.Training)
 		time["hoursDelta"] = abs(hours - previousHours)
 		time["minutesDelta"] = abs(minutes - previousMinutes)
 	}
 	data["training"] = time
-	if previousMax.Distance > 0 {
+	if previousMax.Distance >= 0 {
 		data["distanceDelta"] = roundFloat(math.Abs(d.Distance-previousMax.Distance), 1)
 	}
-	if previousMax.Ascent > 0 {
+	if previousMax.Ascent >= 0 {
 		data["ascentDelta"] = roundFloat(math.Abs(d.Ascent-previousMax.Ascent), 1)
 	}
 
@@ -107,16 +116,16 @@ func (d *Sum) FormatSumForEmail(s ...Sum) map[string]interface{} {
 	time["hours"] = hours
 	time["minutes"] = minutes
 	// compute the delta to the previous month
-	if previousSum.Training > 0 {
+	if previousSum.Training >= 0 {
 		previousHours, previousMinutes := convertSecondsToHoursMinutes(previousSum.Training)
 		time["hoursDelta"] = abs(hours - previousHours)
 		time["minutesDelta"] = abs(minutes - previousMinutes)
 	}
 	data["training"] = time
-	if previousSum.Distance > 0 {
+	if previousSum.Distance >= 0 {
 		data["distanceDelta"] = roundFloat(math.Abs(d.Distance-previousSum.Distance), 1)
 	}
-	if previousSum.Ascent > 0 {
+	if previousSum.Ascent >= 0 {
 		data["ascentDelta"] = roundFloat(math.Abs(d.Ascent-previousSum.Ascent), 1)
 	}
 
@@ -141,6 +150,7 @@ func (d *MonthlyData) FormatForEmail() map[string]interface{} {
 
 	data["current"] = current
 	data["previous"] = previous
+	data["units"] = d.Units
 
 	return data
 }
@@ -166,16 +176,21 @@ func ProcessMonthlyMetrics(data map[string]interface{}) map[string]interface{} {
 	if err := json.Unmarshal(dataAsString, &monthlyData); err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("monthlyData:\n")
-	fmt.Printf("%+v", monthlyData)
-
 	if monthlyData.Units == "imperial" {
 		monthlyData.Previous.Sum.ConvertSumToImperial()
 		monthlyData.Previous.Max.ConvertMaxToImperial()
 		monthlyData.Current.Sum.ConvertSumToImperial()
 		monthlyData.Current.Max.ConvertMaxToImperial()
+	} else {
+		fmt.Println("conveting meters to kilometers")
+		// these values are in meters, so make them kilometers
+		monthlyData.Previous.Sum.ConvertSumDistanceToKms()
+		monthlyData.Previous.Max.ConvertMaxDistanceToKms()
+		monthlyData.Current.Sum.ConvertSumDistanceToKms()
+		monthlyData.Current.Max.ConvertMaxDistanceToKms()
 	}
-
+	fmt.Printf("monthlyData:\n")
+	fmt.Printf("%+v", monthlyData)
 	emailData := monthlyData.FormatForEmail()
 	return emailData
 }
